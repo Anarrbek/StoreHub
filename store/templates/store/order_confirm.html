@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Заказ №{{ order.id }}</h1>
+    <p>Спасибо! Ваш заказ создан.</p>
+    <p>Сумма: {{ order.total_amount }}</p>
+    <p><a href="{% url 'product_list' %}">Вернуться к товарам</a></p>
+  </div>
+{% endblock %}

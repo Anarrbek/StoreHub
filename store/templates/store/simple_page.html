@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <div class="panel hero-panel">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-content">
+        <h1 style="margin-top:0">{{ title }}</h1>
+        {% if content %}
+          <p>{{ content }}</p>
+        {% elif items %}
+          <ul style="margin:0;padding:0;list-style:none;">
+            {% for it in items %}
+              <li style="margin-bottom:10px;">{% if it.name %}{{ it.name }}{% elif it.title and it.text %}<strong>{{ it.title }}</strong><br>{{ it.text }}{% else %}{{ it }}{% endif %}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Информационная страница.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

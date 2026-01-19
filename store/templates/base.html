@@ -1,0 +1,188 @@
+<!-- base.html -->
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    {% load static %}
+    <title>StoreHub - Онлайн магазин</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Современный дизайн маркетплейса */
+      :root{--primary:#FFCC00;--dark:#000;--light:#fff;--bg:#f8f8f8;--text:#333;--muted:#999;--border:#e0e0e0}
+      html.dark{--bg:#1a1a1a;--text:#eee;--muted:#aaa;--border:#333}
+      
+      *{margin:0;padding:0;box-sizing:border-box}
+      html,body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text)}
+      
+      /* === HEADER === */
+      .site-header{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+      html.dark .site-header{background:#222}
+      
+      .header-top{max-width:1400px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+      
+      .brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);font-weight:700;font-size:1.3rem}
+      .logo-icon{width:36px;height:36px;color:var(--primary)}
+      
+      .header-search{flex:1;max-width:500px}
+      .header-search input{width:100%;padding:12px 16px;border:1px solid var(--border);border-radius:6px;background:var(--light);color:var(--text);font-size:14px}
+      html.dark .header-search input{background:#333;color:#eee;border-color:#444}
+      
+      .header-right{display:flex;align-items:center;gap:20px}
+      .header-btn{display:flex;align-items:center;gap:6px;padding:8px 12px;background:transparent;border:none;cursor:pointer;color:var(--text);text-decoration:none;font-weight:600;font-size:14px}
+      .header-btn:hover{color:var(--primary)}
+      .header-btn.login-btn{background:var(--primary);color:var(--dark);border-radius:6px;padding:10px 16px}
+      .header-btn.login-btn:hover{background:#ffb800}
+      
+      /* === ГЛАВНАЯ НАВИГАЦИЯ === */
+      .header-nav{background:#fff;border-bottom:1px solid var(--border);max-width:1400px;margin:0 auto}
+      html.dark .header-nav{background:#222}
+      
+      .nav-inner{padding:0 20px;display:flex;gap:30px;overflow-x:auto}
+      .nav-inner::-webkit-scrollbar{display:none}
+      .nav-item{padding:14px 0;white-space:nowrap;text-decoration:none;color:var(--text);font-weight:500;border-bottom:3px solid transparent;transition:border-color 0.2s}
+      .nav-item:hover{color:var(--primary);border-bottom-color:var(--primary)}
+      
+      /* === КАТАЛОГ КНОПКА === */
+      .catalog-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--primary);color:var(--dark);border:none;border-radius:6px;font-weight:700;cursor:pointer;margin-right:30px}
+      .catalog-btn:hover{background:#ffb800}
+      
+      /* === КОНТЕЙНЕР === */
+      .container{max-width:1400px;margin:0 auto;padding:20px}
+      
+      /* === БАННЕРЫ === */
+      .banner-section{margin-bottom:30px}
+      .banner-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+      .banner{height:200px;border-radius:8px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;padding:20px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;overflow:hidden}
+      .banner:nth-child(2){background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)}
+      .banner:nth-child(3){background:linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)}
+      .banner h3{font-size:1.5rem;margin-bottom:8px}
+      .banner p{font-size:0.9rem;opacity:0.9}
+      @media(max-width:768px){.banner-grid{grid-template-columns:1fr}}
+      
+      /* === ТОВАРЫ === */
+      .products-section h2{margin-bottom:20px;font-size:1.5rem}
+      .products-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+      
+      .product-card{background:var(--light);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:box-shadow 0.2s,transform 0.2s;cursor:pointer}
+      html.dark .product-card{background:#2a2a2a;border-color:#444}
+      .product-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.15);transform:translateY(-2px)}
+      
+      .product-image{width:100%;height:200px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;position:relative}
+      .product-image img{width:100%;height:100%;object-fit:cover}
+      .product-fav{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+      .product-fav:hover{background:white}
+      
+      .product-info{padding:12px}
+      .product-rating{display:flex;align-items:center;gap:4px;margin-bottom:6px;font-size:0.85rem}
+      .product-rating .star{color:#ffb800}
+      .product-name{font-size:0.9rem;font-weight:500;color:var(--text);margin-bottom:6px;min-height:2em;line-height:1em}
+      .product-price{font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:8px}
+      html.dark .product-price{color:var(--primary)}
+      .product-action{display:flex;gap:8px}
+      .product-action button{flex:1;padding:8px;border:1px solid var(--border);background:transparent;border-radius:4px;cursor:pointer;font-weight:600;font-size:0.85rem}
+      .product-action .add-btn{background:var(--primary);color:var(--dark);border-color:var(--primary)}
+      .product-action .add-btn:hover{background:#ffb800}
+      
+      @media(max-width:1200px){.products-grid{grid-template-columns:repeat(4,1fr)}}
+      @media(max-width:768px){.products-grid{grid-template-columns:repeat(2,1fr)}}
+      @media(max-width:480px){.products-grid{grid-template-columns:1fr}}
+      
+      /* === FOOTER === */
+      .site-footer{background:#fff;border-top:1px solid var(--border);margin-top:40px;padding:40px 20px;color:var(--muted);text-align:center}
+      html.dark .site-footer{background:#222;border-color:#444}
+      
+      /* === THEME TOGGLE === */
+      .theme-toggle{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+      .theme-toggle:hover{background:var(--primary);color:var(--dark)}
+      
+      /* === MESSAGES === */
+      .messages{max-width:980px;margin:0 auto;padding:12px 18px}
+      .messages .alert{padding:12px;background:#dff0d8;color:#3c763d;border:1px solid #bce8b1;border-radius:4px;margin-bottom:8px}
+      .messages .alert.error{background:#f2dede;color:#a94442;border-color:#ebccd1}
+    </style>
+</head>
+<body>
+    <!-- TOP HEADER -->
+    <div class="site-header">
+      <div class="header-top">
+        <a href="{% url 'home' %}" class="brand">
+          <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 6C9 4.89543 9.89543 4 11 4H21C22.1046 4 23 4.89543 23 6V7H9V6Z" fill="currentColor"/>
+            <path d="M8 7H24C24.5304 7 25.0391 7.21071 25.4142 7.58579C25.7893 7.96086 26 8.46957 26 9V22C26 23.0609 25.5786 24.0783 24.8284 24.8284C24.0783 25.5786 23.0609 26 22 26H10C8.93913 26 7.92172 25.5786 7.17157 24.8284C6.42143 24.0783 6 23.0609 6 22V9C6 8.46957 6.21071 7.96086 6.58579 7.58579C6.96086 7.21071 7.46957 7 8 7Z" fill="currentColor" opacity="0.8"/>
+            <circle cx="13" cy="16" r="1.5" fill="white"/>
+            <circle cx="19" cy="16" r="1.5" fill="white"/>
+            <path d="M10 13H22" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span>StoreHub</span>
+        </a>
+        
+        <div class="header-search">
+          <form action="{% url 'search' %}" method="get">
+            <input type="text" name="q" placeholder="Найти товары" value="{{ request.GET.q|default_if_none:'' }}">
+          </form>
+        </div>
+        
+        <div class="header-right">
+          <button class="theme-toggle" id="themeToggleGlobal" title="Сменить тему">🌙</button>
+          {% if user.is_authenticated %}
+            <a href="{% url 'favorites' %}" class="header-btn">❤️ Избранное</a>
+            <a href="{% url 'cart_view' %}" class="header-btn">🛒 Корзина</a>
+            <a href="{% url 'logout' %}" class="header-btn">👤 Выход</a>
+          {% else %}
+            <a href="{% url 'login' %}" class="header-btn login-btn">Войти</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    
+    <!-- NAV -->
+    <div class="header-nav">
+      <div class="nav-inner">
+        <button class="catalog-btn">📂 Каталог</button>
+        <a href="{% url 'home' %}" class="nav-item">Главная</a>
+        <a href="{% url 'product_list' %}" class="nav-item">Товары</a>
+        <a href="{% url 'reservations' %}" class="nav-item">Бронирования</a>
+        <a href="{% url 'faq' %}" class="nav-item">Помощь</a>
+      </div>
+    </div>
+    
+    <!-- MESSAGES -->
+    {% if messages %}
+      <div class="messages">
+        {% for message in messages %}
+          <div class="alert {% if message.tags %}{{ message.tags }}{% endif %}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <!-- MAIN CONTENT -->
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+    
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <p>&copy; 2024 StoreHub - Онлайн магазин. Все права защищены.</p>
+    </footer>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        var html = document.documentElement;
+        var btn = document.getElementById('themeToggleGlobal');
+        var stored = localStorage.getItem('storeh_theme');
+        if(stored === 'dark') html.classList.add('dark');
+        if(btn){
+          btn.addEventListener('click', function(){
+            html.classList.toggle('dark');
+            var isDark = html.classList.contains('dark');
+            localStorage.setItem('storeh_theme', isDark ? 'dark' : 'light');
+            btn.textContent = isDark ? '☀️' : '🌙';
+          });
+        }
+      });
+    </script>
+</body>
+</html>

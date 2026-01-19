@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Результаты поиска</h1>
+    {% if query %}
+      <p>По запросу «{{ query }}» найдено {{ products.count }} результатов.</p>
+    {% endif %}
+    {% if products %}
+      <ul>
+        {% for p in products %}
+          <li><a href="{% url 'product_detail' slug=p.slug %}">{% if language == 'kg' and p.name_kg %}{{ p.name_kg }}{% elif language == 'ru' and p.name_ru %}{{ p.name_ru }}{% elif language == 'en' and p.name_en %}{{ p.name_en }}{% else %}{{ p.name }}{% endif %}</a></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Ничего не найдено.</p>
+    {% endif %}
+  </div>
+{% endblock %}

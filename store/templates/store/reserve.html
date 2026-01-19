@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Бронирование: {{ product.name }}</h1>
+    <div class="form-panel panel product-form">
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+          <label for="from">С (YYYY-MM-DD HH:MM)</label>
+          <div>
+            <input id="from" name="from" type="text" class="input-field" placeholder="2026-01-12 14:00">
+          </div>
+
+          <label for="to">По (YYYY-MM-DD HH:MM)</label>
+          <div>
+            <input id="to" name="to" type="text" class="input-field" placeholder="2026-01-12 16:00">
+          </div>
+
+          <div></div>
+          <div class="form-actions">
+            <button class="btn-primary" type="submit">Забронировать</button>
+            <a href="{% url 'product_detail' slug=product.slug %}" class="mc-btn" style="background:transparent;border:1px solid rgba(255,255,255,.04);color:var(--text)">Отмена</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

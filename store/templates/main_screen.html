@@ -1,0 +1,13 @@
+{ extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h1>Главная страница (простая версия)</h1>
+    <p>Добро пожаловать в простой магазин. Это чистый и понятный интерфейс для новичков.</p>
+    <ul>
+      <li><a href="{% url 'product_list' %}">Товары</a></li>
+      <li><a href="{% url 'add_product' %}">Добавить товар</a></li>
+      <li><a href="{% url 'faq' %}">Вопросы</a></li>
+    </ul>
+  </div>
+{% endblock %}

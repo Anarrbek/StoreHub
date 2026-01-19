@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- БАННЕРЫ -->
+<section class="banner-section">
+  <div class="banner-grid">
+    <div class="banner">
+      <h3>🎉 Скидка 50%</h3>
+      <p>На избранные товары</p>
+    </div>
+    <div class="banner">
+      <h3>🚀 Быстрая доставка</h3>
+      <p>За 24 часа по всей стране</p>
+    </div>
+    <div class="banner">
+      <h3>💝 Бонусы постоянным</h3>
+      <p>Получайте кешбэк при покупках</p>
+    </div>
+  </div>
+</section>
+
+<!-- ТОВАРЫ -->
+<section class="products-section">
+  <h2>Популярные товары</h2>
+  
+  {% if products %}
+    <div class="products-grid">
+      {% for product in products %}
+        <div class="product-card">
+          <div class="product-image">
+            {% if product.image %}
+              <a href="{% url 'product_detail' slug=product.slug %}">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">
+              </a>
+            {% else %}
+              <a href="{% url 'product_detail' slug=product.slug %}" style="color: var(--muted); text-decoration: none;">Нет изображения</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+              {% if product.id in favorites_set %}
+                <form method="post" action="{% url 'fav_remove' product.id %}" style="display:inline">
+                  {% csrf_token %}
+                  <button type="submit" class="product-fav" title="Удалить из избранного">❤️</button>
+                </form>
+              {% else %}
+                <form method="post" action="{% url 'fav_add' product.id %}" style="display:inline">
+                  {% csrf_token %}
+                  <button type="submit" class="product-fav" title="Добавить в избранное">🤍</button>
+                </form>
+              {% endif %}
+            {% else %}
+              <a href="{% url 'login' %}" class="product-fav" title="Войти для добавления в избранное">🤍</a>
+            {% endif %}
+          </div>
+          
+          <div class="product-info">
+            <div class="product-rating">
+              <span class="star">★</span>
+              <span>4.5 (120 отзывов)</span>
+            </div>
+            
+            <a href="{% url 'product_detail' slug=product.slug %}" class="product-name" style="text-decoration: none; color: inherit;">
+              {% if language == 'kg' and product.name_kg %}
+                {{ product.name_kg }}
+              {% elif language == 'ru' and product.name_ru %}
+                {{ product.name_ru }}
+              {% elif language == 'en' and product.name_en %}
+                {{ product.name_en }}
+              {% else %}
+                {{ product.name }}
+              {% endif %}
+            </a>
+            
+            <div class="product-price">{{ product.price }} ₽</div>
+            
+            <div class="product-action">
+              <form method="post" action="{% url 'cart_add' product.id %}" style="flex:1">
+                {% csrf_token %}
+                <button type="submit" class="add-btn">🛒 В корзину</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p style="text-align: center; color: var(--muted); padding: 40px;">
+      Товары еще не добавлены. <a href="{% url 'add_product' %}">Добавить товар</a>
+    </p>
+  {% endif %}
+</section>
+
+<!-- CTA СЕКЦИЯ -->
+<section style="margin-top: 40px; text-align: center; padding: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; color: white;">
+  <h2>Хотите продавать товары?</h2>
+  <p style="margin: 12px 0; font-size: 1.1rem;">Присоединитесь к нашему маркетплейсу</p>
+  <a href="{% url 'add_product' %}" class="mc-btn" style="background: white; color: #667eea; font-weight: 700;">Начать продавать</a>
+</section>
+
+{% endblock %}

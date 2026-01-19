@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        <h1>Project ZT — простой магазин</h1>
+        <p>Добро пожаловать. Это простая версия интерфейса для обучения Django.</p>
+        <p><a href="{% url 'product_list' %}">Перейти к товарам</a> — список всех товаров.</p>
+        <p><a href="{% url 'product_create' %}">Добавить товар</a> — простая форма для добавления.</p>
+    </div>
+{% endblock %}

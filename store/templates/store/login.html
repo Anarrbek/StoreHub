@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px">
+  <div style="width:100%; max-width:400px">
+    <div style="margin-bottom:32px; text-align:center">
+      <h1 style="margin:0 0 8px 0; font-size:2rem; font-weight:700">Вход в аккаунт</h1>
+      <p style="color:var(--muted); margin:0">Войдите в StoreHub</p>
+    </div>
+
+    <div style="background:var(--light); border-radius:12px; padding:30px; border:1px solid var(--border)">
+      {% if error %}
+        <div style="padding:12px; background:#f2dede; color:#a94442; border-radius:6px; margin-bottom:20px; border:1px solid #ebccd1">
+          {{ error }}
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Имя пользователя -->
+        <div style="margin-bottom:20px">
+          <label for="id_username" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+            Имя пользователя
+          </label>
+          <input type="text" name="username" id="id_username" placeholder="Введите ваше имя" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; background:var(--light); color:var(--text); font-size:1rem; box-sizing:border-box" required>
+        </div>
+
+        <!-- Пароль -->
+        <div style="margin-bottom:24px">
+          <label for="id_password" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+            Пароль
+          </label>
+          <input type="password" name="password" id="id_password" placeholder="Введите пароль" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; background:var(--light); color:var(--text); font-size:1rem; box-sizing:border-box" required>
+        </div>
+
+        <!-- Кнопка -->
+        <button type="submit" style="width:100%; padding:14px; background:var(--primary); color:var(--dark); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer; margin-bottom:20px">
+          Войти
+        </button>
+      </form>
+
+      <div style="text-align:center; padding-top:20px; border-top:1px solid var(--border)">
+        <p style="margin:12px 0; color:var(--muted)">Нет аккаунта?</p>
+        <a href="{% url 'register' %}" style="display:inline-block; padding:10px 16px; background:transparent; color:var(--primary); text-decoration:none; font-weight:600; border-radius:6px; border:1px solid var(--primary)">
+          Зарегистрироваться
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  input[type="text"],
+  input[type="password"] {
+    transition: all 0.2s;
+  }
+
+  html.dark input[type="text"],
+  html.dark input[type="password"] {
+    background: #333;
+    border-color: #444;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+  }
+
+  button[type="submit"]:hover {
+    background: #ffb800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+  }
+
+  button[type="submit"]:active {
+    transform: translateY(0);
+  }
+</style>
+{% endblock %}

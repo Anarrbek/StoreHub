@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="max-width:600px; margin:40px auto">
+  <div style="margin-bottom:32px">
+    <h1 style="margin:0 0 8px 0; font-size:2rem; font-weight:700">Добавить категорию</h1>
+    <p style="color:var(--muted); margin:0">Создайте новую категорию товаров</p>
+  </div>
+
+  <div style="background:var(--light); border-radius:12px; padding:30px; border:1px solid var(--border)">
+    {% if messages %}
+      {% for message in messages %}
+        <div style="padding:12px; background:#dff0d8; color:#3c763d; border-radius:6px; margin-bottom:20px; border:1px solid #bce8b1">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div style="padding:12px; background:#f2dede; color:#a94442; border-radius:6px; margin-bottom:20px; border:1px solid #ebccd1">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <!-- Название категории -->
+      <div style="margin-bottom:24px">
+        <label for="{{ form.name.id_for_label }}" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+          Название категории *
+        </label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <div style="color:#d32f2f; font-size:0.85rem; margin-top:6px">{{ form.name.errors }}</div>
+        {% endif %}
+      </div>
+
+      <!-- Описание категории -->
+      {% if form.description %}
+        <div style="margin-bottom:24px">
+          <label for="{{ form.description.id_for_label }}" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+            Описание
+          </label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div style="color:#d32f2f; font-size:0.85rem; margin-top:6px">{{ form.description.errors }}</div>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <!-- Кнопки -->
+      <div style="display:flex; gap:12px">
+        <button type="submit" style="flex:1; padding:14px; background:var(--primary); color:var(--dark); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer">
+          ✓ Создать категорию
+        </button>
+        <a href="{% url 'product_list' %}" style="padding:14px 24px; border:1px solid var(--border); border-radius:8px; text-decoration:none; color:var(--text); font-weight:600; text-align:center">
+          ✕ Отмена
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  input[type="text"],
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--light);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.2s;
+    box-sizing: border-box;
+  }
+
+  html.dark input[type="text"],
+  html.dark textarea {
+    background: #333;
+    border-color: #444;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+  }
+
+  button[type="submit"]:hover {
+    background: #ffb800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+  }
+
+  button[type="submit"]:active {
+    transform: translateY(0);
+  }
+</style>
+{% endblock %}

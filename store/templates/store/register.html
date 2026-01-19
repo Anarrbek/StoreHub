@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px">
+  <div style="width:100%; max-width:400px">
+    <div style="margin-bottom:32px; text-align:center">
+      <h1 style="margin:0 0 8px 0; font-size:2rem; font-weight:700">Создать аккаунт</h1>
+      <p style="color:var(--muted); margin:0">Присоединитесь к StoreHub</p>
+    </div>
+
+    <div style="background:var(--light); border-radius:12px; padding:30px; border:1px solid var(--border)">
+      {% if form.non_field_errors %}
+        <div style="padding:12px; background:#f2dede; color:#a94442; border-radius:6px; margin-bottom:20px; border:1px solid #ebccd1">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Имя пользователя -->
+        <div style="margin-bottom:20px">
+          <label for="{{ form.username.id_for_label }}" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+            Имя пользователя
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div style="color:#d32f2f; font-size:0.85rem; margin-top:6px">{{ form.username.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div style="margin-bottom:20px">
+          <label for="{{ form.email.id_for_label }}" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+            Email
+          </label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div style="color:#d32f2f; font-size:0.85rem; margin-top:6px">{{ form.email.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Пароль -->
+        <div style="margin-bottom:20px">
+          <label for="id_password1" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+            Пароль
+          </label>
+          <input type="password" name="password1" id="id_password1" placeholder="Минимум 8 символов" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; background:var(--light); color:var(--text); font-size:1rem; box-sizing:border-box" required>
+          {% if form.password1.errors %}
+            <div style="color:#d32f2f; font-size:0.85rem; margin-top:6px">{{ form.password1.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Подтверждение пароля -->
+        <div style="margin-bottom:24px">
+          <label for="id_password2" style="display:block; font-weight:600; margin-bottom:8px; color:var(--text)">
+            Подтвердить пароль
+          </label>
+          <input type="password" name="password2" id="id_password2" placeholder="Повторите пароль" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:8px; background:var(--light); color:var(--text); font-size:1rem; box-sizing:border-box" required>
+          {% if form.password2.errors %}
+            <div style="color:#d32f2f; font-size:0.85rem; margin-top:6px">{{ form.password2.errors }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Кнопка -->
+        <button type="submit" style="width:100%; padding:14px; background:var(--primary); color:var(--dark); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer; margin-bottom:20px">
+          Зарегистрироваться
+        </button>
+      </form>
+
+      <div style="text-align:center; padding-top:20px; border-top:1px solid var(--border)">
+        <p style="margin:12px 0; color:var(--muted)">Уже есть аккаунт?</p>
+        <a href="{% url 'login' %}" style="display:inline-block; padding:10px 16px; background:transparent; color:var(--primary); text-decoration:none; font-weight:600; border-radius:6px; border:1px solid var(--primary)">
+          Войти
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  input[type="text"],
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--light);
+    color: var(--text);
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  input[type="password"]::placeholder {
+    color: var(--muted);
+  }
+
+  html.dark input[type="text"],
+  html.dark input[type="email"],
+  html.dark input[type="password"] {
+    background: #333;
+    border-color: #444;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+  }
+
+  button[type="submit"]:hover {
+    background: #ffb800;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+  }
+
+  button[type="submit"]:active {
+    transform: translateY(0);
+  }
+</style>
+{% endblock %}

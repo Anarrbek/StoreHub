@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="max-width:1200px">
+  <div style="margin-bottom:40px">
+    <h1 style="margin:0 0 8px 0; font-size:2rem; font-weight:700">Избранное</h1>
+    <p style="color:var(--muted); margin:0">{% if products %}{{ products|length }} товаров{% else %}Пусто{% endif %}</p>
+  </div>
+
+  {% if products %}
+    <div class="products-grid">
+      {% for p in products %}
+        <div class="product-card">
+          <div class="product-image">
+            {% if p.image %}
+              <a href="{% url 'product_detail' slug=p.slug %}" style="text-decoration:none">
+                <img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">
+              </a>
+            {% else %}
+              <a href="{% url 'product_detail' slug=p.slug %}" style="color:var(--muted); text-decoration:none">Нет изображения</a>
+            {% endif %}
+            <form method="post" action="{% url 'fav_remove' p.id %}" style="display:inline">
+              {% csrf_token %}
+              <button type="submit" class="product-fav" title="Удалить из избранного">❤️</button>
+            </form>
+          </div>
+          
+          <div class="product-info">
+            <div class="product-rating">
+              <span class="star">★★★★☆</span>
+            </div>
+            
+            <a href="{% url 'product_detail' slug=p.slug %}" class="product-name" style="text-decoration:none; color:inherit">
+              {% if language == 'kg' and p.name_kg %}{{ p.name_kg }}{% elif language == 'ru' and p.name_ru %}{{ p.name_ru }}{% elif language == 'en' and p.name_en %}{{ p.name_en }}{% else %}{{ p.name }}{% endif %}
+            </a>
+            
+            <div style="color:var(--muted); font-size:0.85rem; margin:4px 0">
+              {% if p.category %}{{ p.category.name }}{% endif %}
+            </div>
+            
+            <div class="product-price">{{ p.price }} ₽</div>
+            
+            <div class="product-action">
+              <form method="post" action="{% url 'cart_add' p.id %}" style="flex:1">
+                {% csrf_token %}
+                <button type="submit" class="add-btn">🛒 В корзину</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="background:var(--light); border-radius:12px; padding:60px 24px; border:1px solid var(--border); text-align:center">
+      <div style="font-size:3rem; margin-bottom:16px">🤍</div>
+      <h2 style="margin:0 0 8px 0; font-size:1.5rem; font-weight:700">Избранное пусто</h2>
+      <p style="color:var(--muted); margin:0 0 24px 0">Добавьте товары в избранное, чтобы они отобразились здесь</p>
+      <a href="{% url 'product_list' %}" style="display:inline-block; padding:14px 28px; background:var(--primary); color:var(--dark); text-decoration:none; border-radius:8px; font-weight:700">
+        Смотреть каталог
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'store/simple_page.html' %}
+{# Упрощённая главная — теперь рендерится через `home` и `simple_page.html`. #}
+
+    <ul>
+      <li><a href="{% url 'product_list' %}">Товары</a></li>
+      <li><a href="{% url 'add_product' %}">Добавить товар</a></li>
+      <li><a href="{% url 'faq' %}">Вопросы</a></li>
+    </ul>
+  </div>
+{% endblock %}

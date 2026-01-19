@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="products-section">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+    <h2>Каталог товаров</h2>
+    <a href="{% url 'add_product' %}" class="mc-btn">+ Добавить товар</a>
+  </div>
+  
+  {% if products %}
+    <div class="products-grid">
+      {% for p in products %}
+        <div class="product-card">
+          <div class="product-image">
+            {% if p.image %}
+              <a href="{% url 'product_detail' slug=p.slug %}">
+                <img src="{{ p.image.url }}" alt="{{ p.name }}" loading="lazy">
+              </a>
+            {% else %}
+              <a href="{% url 'product_detail' slug=p.slug %}" style="color:var(--muted);">Нет изображения</a>
+            {% endif %}
+            {% if p.id in favorites_set %}
+              <form method="post" action="{% url 'fav_remove' p.id %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="product-fav">❤️</button>
+              </form>
+            {% else %}
+              <form method="post" action="{% url 'fav_add' p.id %}" style="display:inline">
+                {% csrf_token %}
+                <button type="submit" class="product-fav">🤍</button>
+              </form>
+            {% endif %}
+          </div>
+          
+          <div class="product-info">
+            <div class="product-rating">
+              <span class="star">★★★★☆</span>
+            </div>
+            
+            <a href="{% url 'product_detail' slug=p.slug %}" class="product-name">
+              {% if language == 'kg' and p.name_kg %}{{ p.name_kg }}{% elif language == 'ru' and p.name_ru %}{{ p.name_ru }}{% elif language == 'en' and p.name_en %}{{ p.name_en }}{% else %}{{ p.name }}{% endif %}
+            </a>
+            
+            <div class="product-price">{{ p.price }} ₽</div>
+            
+            <div class="product-action">
+              <form method="post" action="{% url 'cart_add' p.id %}" style="flex:1">
+                {% csrf_token %}
+                <button type="submit" class="add-btn">🛒 В корзину</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    
+    <!-- ПАГИНАЦИЯ -->
+    {% if page_obj.has_other_pages %}
+      <div class="pagination" style="margin-top:30px">
+        {% if page_obj.has_previous %}
+          <a href="?page=1">« Первая</a>
+          <a href="?page={{ page_obj.previous_page_number }}">← Назад</a>
+        {% endif %}
+        
+        <span class="current">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Далее →</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}">Последняя »</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% else %}
+    <p style="text-align:center;color:var(--muted);padding:40px">Товары еще не добавлены</p>
+  {% endif %}
+</section>
+{% endblock %}

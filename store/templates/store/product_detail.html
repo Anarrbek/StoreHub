@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="max-width:1200px">
+  <a href="{% url 'product_list' %}" style="color:var(--primary); text-decoration:none; font-weight:600; margin-bottom:24px; display:inline-block">← Назад к товарам</a>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-bottom:40px">
+    <!-- Изображение -->
+    <div>
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width:100%; border-radius:12px; object-fit:cover; height:500px">
+      {% else %}
+        <div style="background:var(--light); border-radius:12px; width:100%; height:500px; display:flex; align-items:center; justify-content:center; color:var(--muted); border:1px solid var(--border)">
+          Нет изображения
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Информация о товаре -->
+    <div>
+      <h1 style="margin:0 0 12px 0; font-size:2rem; font-weight:700">
+        {% if language == 'kg' and product.name_kg %}{{ product.name_kg }}{% elif language == 'ru' and product.name_ru %}{{ product.name_ru }}{% elif language == 'en' and product.name_en %}{{ product.name_en }}{% else %}{{ product.name }}{% endif %}
+      </h1>
+      
+      <div style="color:var(--muted); margin-bottom:20px">
+        {% if product.category %}
+          <span>Категория: <strong>{{ product.category.name }}</strong></span>
+        {% endif %}
+      </div>
+
+      <!-- Оценка -->
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:20px">
+        <span style="font-size:1.2rem">★★★★☆</span>
+        <span style="color:var(--muted)">(120 отзывов)</span>
+      </div>
+
+      <!-- Цена -->
+      <div style="background:linear-gradient(135deg, #FFCC00 0%, #FFB800 100%); padding:20px; border-radius:12px; margin-bottom:24px">
+        <div style="color:var(--dark); font-size:0.9rem; margin-bottom:4px">Цена</div>
+        <div style="font-size:2.5rem; font-weight:700; color:var(--dark)">{{ product.price }} ₽</div>
+      </div>
+
+      <!-- Остаток -->
+      <div style="padding:16px; background:var(--light); border-radius:8px; margin-bottom:24px; border:1px solid var(--border)">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+          <span style="color:var(--muted)">В наличии:</span>
+          <span style="font-weight:700; font-size:1.1rem">
+            {% if product.stock > 0 %}
+              <span style="color:#10b981">{{ product.stock }} шт.</span>
+            {% else %}
+              <span style="color:#d32f2f">Нет в наличии</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- Добавить в корзину -->
+      <form method="post" action="{% url 'cart_add' product.id %}" style="margin-bottom:16px">
+        {% csrf_token %}
+        <div style="display:flex; gap:12px; margin-bottom:16px">
+          <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" style="width:80px; padding:12px 14px; border:1px solid var(--border); border-radius:8px; background:var(--light); color:var(--text); font-size:1rem; box-sizing:border-box">
+          <button type="submit" style="flex:1; padding:12px 24px; background:var(--primary); color:var(--dark); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer">
+            🛒 Добавить в корзину
+          </button>
+        </div>
+      </form>
+
+      <!-- Дополнительные кнопки -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px">
+        <!-- Избранное -->
+        {% if user.is_authenticated %}
+          {% if product.id in favorites_set %}
+            <form method="post" action="{% url 'fav_remove' product.id %}}">
+              {% csrf_token %}
+              <button type="submit" style="width:100%; padding:12px; background:#ff6b6b; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer">
+                ❤️ Удалить из избранного
+              </button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'fav_add' product.id %}}">
+              {% csrf_token %}
+              <button type="submit" style="width:100%; padding:12px; background:var(--light); color:var(--text); border:1px solid var(--border); border-radius:8px; font-weight:600; cursor:pointer">
+                🤍 В избранное
+              </button>
+            </form>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'login' %}" style="padding:12px; background:var(--light); color:var(--text); border:1px solid var(--border); border-radius:8px; font-weight:600; text-decoration:none; text-align:center">
+            🤍 В избранное
+          </a>
+        {% endif %}
+
+        <!-- Забронировать -->
+        <a href="{% url 'reserve' product.id %}" style="padding:12px; background:linear-gradient(90deg, #f59e0b, #f97316); color:white; border:none; border-radius:8px; font-weight:600; text-decoration:none; text-align:center">
+          📅 Забронировать
+        </a>
+      </div>
+
+      <!-- Купить сейчас -->
+      <form method="post" action="{% url 'buy_now' product.id %}" style="margin-bottom:24px">
+        {% csrf_token %}
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" style="width:100%; padding:14px; background:linear-gradient(90deg, #10b981, #06b6d4); color:white; border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer">
+          ⚡ Купить сейчас
+        </button>
+      </form>
+
+      <!-- Отзыв -->
+      <a href="{% url 'review_add' product.id %}" style="display:block; padding:12px; text-align:center; border:2px dashed var(--border); border-radius:8px; text-decoration:none; color:var(--text); font-weight:600">
+        ✍️ Оставить отзыв
+      </a>
+    </div>
+  </div>
+
+  <!-- Описание -->
+  <div style="background:var(--light); border-radius:12px; padding:30px; border:1px solid var(--border); margin-bottom:40px">
+    <h2 style="margin:0 0 16px 0; font-size:1.5rem; font-weight:700">Описание товара</h2>
+    <div style="color:var(--text); line-height:1.6">
+      {% if language == 'kg' and product.description_kg %}
+        {{ product.description_kg|linebreaks }}
+      {% elif language == 'ru' and product.description_ru %}
+        {{ product.description_ru|linebreaks }}
+      {% elif language == 'en' and product.description_en %}
+        {{ product.description_en|linebreaks }}
+      {% else %}
+        {{ product.description|linebreaks }}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Похожие товары -->
+  <div style="margin-bottom:40px">
+    <h2 style="margin:0 0 20px 0; font-size:1.5rem; font-weight:700">Похожие товары</h2>
+    <div class="products-grid">
+      <!-- Здесь будут похожие товары из той же категории -->
+    </div>
+  </div>
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    [style*="grid-template-columns:1fr 1fr"]:first-of-type {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}

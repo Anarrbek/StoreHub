@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container" style="max-width:900px">
+  <div style="margin-bottom:40px">
+    <h1 style="margin:0 0 8px 0; font-size:2rem; font-weight:700">Оформление заказа</h1>
+    <p style="color:var(--muted); margin:0">Проверьте товары и завершите заказ</p>
+  </div>
+
+  {% if items %}
+    <div style="display:grid; grid-template-columns:1fr 350px; gap:30px">
+      <!-- Товары -->
+      <div style="background:var(--light); border-radius:12px; padding:24px; border:1px solid var(--border)">
+        <h2 style="margin:0 0 20px 0; font-size:1.3rem; font-weight:700">Товары в корзине</h2>
+
+        {% for item in items %}
+          <div style="display:flex; gap:16px; padding:16px 0; border-bottom:1px solid var(--border)">
+            {% if item.product.image %}
+              <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width:80px; height:80px; object-fit:cover; border-radius:8px">
+            {% else %}
+              <div style="width:80px; height:80px; background:var(--border); border-radius:8px"></div>
+            {% endif %}
+
+            <div style="flex:1">
+              <h3 style="margin:0 0 4px 0; font-weight:600">{{ item.product.name }}</h3>
+              <p style="color:var(--muted); margin:0 0 8px 0; font-size:0.9rem">Кол-во: {{ item.quantity }}</p>
+              <div style="display:flex; justify-content:space-between; align-items:center">
+                <span style="font-weight:700; font-size:1.1rem">₽{{ item.product.price }}</span>
+                <a href="{% url 'remove_from_cart' item.id %}" style="color:#d32f2f; text-decoration:none; font-size:0.9rem; font-weight:600">Удалить</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Итоговая панель -->
+      <div style="background:var(--light); border-radius:12px; padding:24px; border:1px solid var(--border); height:fit-content; position:sticky; top:20px">
+        <h2 style="margin:0 0 20px 0; font-size:1.1rem; font-weight:700">Итого</h2>
+
+        <div style="background:rgba(255, 204, 0, 0.1); padding:16px; border-radius:8px; margin-bottom:20px">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px">
+            <span style="color:var(--muted)">Сумма товаров:</span>
+            <span style="font-weight:600">₽{{ total }}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px">
+            <span style="color:var(--muted)">Доставка:</span>
+            <span style="font-weight:600">Бесплатно</span>
+          </div>
+          <div style="border-top:1px solid rgba(0,0,0,0.1); padding-top:8px; margin-top:8px">
+            <div style="display:flex; justify-content:space-between">
+              <span style="font-weight:700">К оплате:</span>
+              <span style="font-weight:700; font-size:1.2rem; color:var(--primary)">₽{{ total }}</span>
+            </div>
+          </div>
+        </div>
+
+        <form method="post" style="margin-bottom:12px">
+          {% csrf_token %}
+          <button type="submit" style="width:100%; padding:14px; background:var(--primary); color:var(--dark); border:none; border-radius:8px; font-weight:700; font-size:1rem; cursor:pointer">
+            ✓ Оформить заказ
+          </button>
+        </form>
+
+        <a href="{% url 'product_list' %}" style="display:block; padding:12px; border:1px solid var(--border); border-radius:8px; text-decoration:none; color:var(--text); font-weight:600; text-align:center">
+          ← Продолжить покупки
+        </a>
+
+        <p style="color:var(--muted); font-size:0.85rem; margin-top:16px; text-align:center">
+          Все товары по лучшим ценам в StoreHub
+        </p>
+      </div>
+    </div>
+
+  {% else %}
+    <div style="background:var(--light); border-radius:12px; padding:60px 24px; border:1px solid var(--border); text-align:center">
+      <div style="font-size:3rem; margin-bottom:16px">🛒</div>
+      <h2 style="margin:0 0 8px 0; font-size:1.5rem; font-weight:700">Ваша корзина пуста</h2>
+      <p style="color:var(--muted); margin:0 0 24px 0">Добавьте товары, чтобы оформить заказ</p>
+      <a href="{% url 'product_list' %}" style="display:inline-block; padding:14px 28px; background:var(--primary); color:var(--dark); text-decoration:none; border-radius:8px; font-weight:700">
+        Начать покупки
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    [style*="grid-template-columns:1fr 350px"] {
+      grid-template-columns: 1fr;
+    }
+
+    [style*="position:sticky"] {
+      position: relative;
+    }
+  }
+</style>
+{% endblock %}
