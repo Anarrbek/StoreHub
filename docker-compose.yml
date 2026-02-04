@@ -1,0 +1,108 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: storehub-db
+    environment:
+      POSTGRES_DB: storehub
+      POSTGRES_USER: storehub_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U storehub_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - storehub-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: storehub-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - storehub-network
+
+  web:
+    build: .
+    container_name: storehub-web
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py collectstatic --noinput &&
+             gunicorn shops.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    volumes:
+      - .:/app
+      - staticfiles:/app/staticfiles
+      - media:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - DATABASE_URL=postgresql://storehub_user:${DB_PASSWORD:-changeme}@db:5432/storehub
+      - REDIS_URL=redis://redis:6379/0
+      - STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY:-}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - storehub-network
+
+  celery:
+    build: .
+    container_name: storehub-celery
+    command: celery -A shops worker -l info
+    environment:
+      - DEBUG=${DEBUG:-False}
+      - DATABASE_URL=postgresql://storehub_user:${DB_PASSWORD:-changeme}@db:5432/storehub
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+    networks:
+      - storehub-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: storehub-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - staticfiles:/app/staticfiles:ro
+      - media:/app/media:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+    networks:
+      - storehub-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  staticfiles:
+  media:
+
+networks:
+  storehub-network:
+    driver: bridge

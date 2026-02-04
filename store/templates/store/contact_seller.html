@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Связь с продавцом — {{ product.name }}{% endblock %}
+
+{% block content %}
+<style>
+    .contact-container {
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    .contact-card {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .product-info {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    .product-details h3 {
+        margin: 0 0 5px 0;
+        color: var(--text-color);
+    }
+    .product-price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #FFCC00;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 14px;
+        background: var(--bg-primary);
+        color: var(--text-color);
+        box-sizing: border-box;
+    }
+    .form-group textarea {
+        resize: vertical;
+        min-height: 150px;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: #FFCC00;
+        box-shadow: 0 0 0 3px rgba(255, 204, 0, 0.1);
+    }
+    .btn-submit {
+        background: #FFCC00;
+        color: #000;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-size: 16px;
+    }
+    .btn-submit:hover {
+        background: #FFD700;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 204, 0, 0.3);
+    }
+    .form-note {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 10px;
+    }
+    .messages {
+        margin-bottom: 20px;
+    }
+    .alert {
+        padding: 12px 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+</style>
+
+<div class="contact-container">
+    <div class="contact-card">
+        <h1 style="margin-top: 0; color: var(--text-color);">Связь с продавцом</h1>
+        
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="product-info">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+            {% else %}
+            <div class="product-image" style="background: #ddd; display: flex; align-items: center; justify-content: center;">
+                📦
+            </div>
+            {% endif %}
+            <div class="product-details">
+                <h3>{{ product.name }}</h3>
+                <div class="product-price">{{ product.price }} с</div>
+            </div>
+        </div>
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            {% if not request.user.is_authenticated %}
+            <div class="form-group">
+                <label for="from_name">Ваше имя *</label>
+                <input type="text" id="from_name" name="from_name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="from_email">Ваш email *</label>
+                <input type="email" id="from_email" name="from_email" required>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="id_phone">Телефон</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                <div style="color: #d32f2f; font-size: 12px; margin-top: 5px;">{{ form.phone.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_subject">Тема сообщения *</label>
+                {{ form.subject }}
+                {% if form.subject.errors %}
+                <div style="color: #d32f2f; font-size: 12px; margin-top: 5px;">{{ form.subject.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_message">Сообщение *</label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                <div style="color: #d32f2f; font-size: 12px; margin-top: 5px;">{{ form.message.errors }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-submit">📧 Отправить сообщение</button>
+            <p class="form-note">Продавец получит ваше сообщение и свяжется с вами как можно скорее.</p>
+        </form>
+    </div>
+</div>
+{% endblock %}

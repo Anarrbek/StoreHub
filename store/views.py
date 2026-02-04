@@ -9,6 +9,110 @@ from .models import Favorite, Review, Reservation
 from .forms import CategoryForm
 from django.utils.text import slugify
 from django.core.paginator import Paginator
+from rest_framework.views import APIView
+from rest_framework.response import Response
+import openai
+import os
+
+def check_product_compliance(name, description):
+    """
+    Проверяет, соответствует ли товар правилам сайта с помощью AI или простых правил.
+    Возвращает True, если можно публиковать, False иначе.
+    """
+    api_key = os.environ.get('OPENAI_API_KEY')
+    use_ai = api_key and api_key != 'your-openai-api-key-here'
+    
+    # Простая проверка на запрещенные слова
+    forbidden_words = ['beer', 'alcohol', 'vodka', 'wine', 'weapon', 'gun', 'drug', 'narcotic', 'fake', 'counterfeit']
+    text = (name + ' ' + description).lower()
+    for word in forbidden_words:
+        if word in text:
+            return False, f"Товар содержит запрещенное слово: {word}"
+    
+    if not use_ai:
+        # Без AI, только простая проверка
+        return True, ""
+    
+    client = openai.OpenAI(api_key=api_key)
+    prompt = f"""
+    Ты - строгий модератор сайта маркетплейса. Твоя задача - проверить, можно ли публиковать товар на основе названия и описания.
+
+    Запрещенные категории товаров:
+    - Алкоголь и наркотики (пиво, вино, водка, сигареты, наркотики)
+    - Оружие и боеприпасы (пистолеты, ножи, взрывчатка)
+    - Подделки и контрафакт (фейковые бренды, фальшивые документы)
+    - Незаконные услуги (мошенничество, хакинг, продажа данных)
+    - Вредные или опасные товары (ядовитые вещества, запрещенные химикаты)
+    - Любые товары, нарушающие законы или моральные нормы
+
+    Название товара: "{name}"
+    Описание товара: "{description}"
+
+    Инструкции:
+    - Если товар явно запрещен, ответь "НЕТ: [краткая причина]".
+    - Если товар сомнительный, но не явно запрещен, ответь "НЕТ: [причина]".
+    - Если товар разрешен, ответь "ДА".
+    - Будь строгим, но справедливым. Не блокируй обычные товары.
+
+    Ответь только в формате: ДА или НЕТ: причина
+    """
+    try:
+        # Сначала используем Moderation API для проверки на вредный контент
+        mod_response = client.moderations.create(input=name + " " + description)
+        if mod_response.results[0].flagged:
+            return False, "Товар содержит вредный или запрещенный контент"
+        
+        # Затем custom prompt
+        response = client.chat.completions.create(
+            model="gpt-4",  # Используем GPT-4 для лучшей модерации
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=50,
+            temperature=0  # Для детерминированного ответа
+        )
+        answer = response.choices[0].message.content.strip()
+        if answer.upper().startswith("ДА"):
+            return True, ""
+        elif answer.upper().startswith("НЕТ"):
+            reason = answer.split(":", 1)[1].strip() if ":" in answer else "Нарушение правил сайта"
+            return False, reason
+        else:
+            return True, ""  # Если ответ неясный, разрешить
+    except Exception as e:
+        # В случае ошибки, разрешить публикацию
+        return True, ""
+
+class AIChatView(APIView):
+    def post(self, request):
+        message = request.data.get("message")
+        if not message:
+            return Response({"answer": "Пожалуйста, задайте вопрос."})
+
+        api_key = os.environ.get('OPENAI_API_KEY')
+        if not api_key or api_key == 'your-openai-api-key-here':
+            return Response({"answer": "Чат временно недоступен. API ключ не настроен."})
+
+        client = openai.OpenAI(api_key=api_key)
+        prompt = f"""
+        Ты - помощник сайта маркетплейса. Отвечай только на вопросы, связанные с сайтом, покупками, продажами, правилами и советами по использованию сайта.
+        Не отвечай на посторонние вопросы. Если вопрос не про сайт, скажи "Я могу помочь только с вопросами о сайте."
+
+        Вопрос пользователя: {message}
+
+        Контекст сайта: Это маркетплейс для продажи товаров. Пользователи могут добавлять товары, покупать, использовать корзину, избранное. Правила: не размещать запрещенные товары, быть честным.
+
+        Дай полезный совет или ответ.
+        """
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=200
+            )
+            answer = response.choices[0].message.content.strip()
+        except Exception as e:
+            answer = "Извините, произошла ошибка. Попробуйте позже."
+
+        return Response({"answer": answer})
 
 def _unique_slug_for_model(model, base_slug):
     """Return a unique slug for given model by appending -1, -2... if needed."""
@@ -76,6 +180,11 @@ def add_product(request):
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
+            # Проверка товара на соответствие правилам
+            compliant, reason = check_product_compliance(product.name, product.description)
+            if not compliant:
+                messages.error(request, f"Товар не может быть опубликован: {reason}")
+                return render(request, 'store/add_product.html', {'form': form, 'created': created})
             # если категория не выбрана — используем или создаём 'Uncategorized'
             if not product.category_id:
                 cat, _ = Category.objects.get_or_create(name='Uncategorized', slug='uncategorized')
@@ -112,6 +221,10 @@ def faq(request):
         {'title':'Как оплатить?', 'text':'В этой учебной версии оплата пока не реализована.'}
     ]
     return render(request, 'store/simple_page.html', {'title':'Вопросы и ответы', 'items': faqs})
+
+
+def chat_view(request):
+    return render(request, 'store/chat.html')
 
 
 def add_category(request):

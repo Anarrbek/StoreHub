@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <div class="panel hero-panel">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-content">
+        <h1 style="margin-top:0">Чат с помощником сайта</h1>
+        <p>Задайте вопрос о сайте, покупках или продажах.</p>
+        <div id="chat-container">
+          <div id="messages"></div>
+          <form id="chat-form">
+            <input type="text" id="message-input" placeholder="Ваш вопрос..." required>
+            <button type="submit">Отправить</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('chat-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const message = document.getElementById('message-input').value;
+      document.getElementById('message-input').value = '';
+      addMessage('Вы: ' + message);
+      fetch('/api/chat/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({message: message})
+      })
+      .then(response => response.json())
+      .then(data => {
+        addMessage('Помощник: ' + data.answer);
+      })
+      .catch(error => {
+        addMessage('Ошибка: Не удалось получить ответ.');
+      });
+    });
+
+    function addMessage(text) {
+      const messages = document.getElementById('messages');
+      const messageDiv = document.createElement('div');
+      messageDiv.textContent = text;
+      messages.appendChild(messageDiv);
+      messages.scrollTop = messages.scrollHeight;
+    }
+  </script>
+{% endblock %}

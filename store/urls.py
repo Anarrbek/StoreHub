@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import AIChatView
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -37,4 +38,7 @@ urlpatterns = [
     path('reservations/<int:res_id>/cancel/', views.cancel_reservation, name='cancel_reservation'),
 
     path('search/', views.search_view, name='search'),
+
+    path("ai/chat/", AIChatView.as_view()),
+    path('chat/', views.chat_view, name='chat'),
 ]
